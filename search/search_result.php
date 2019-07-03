@@ -5,7 +5,8 @@
         printf("Connect failed: %s\n", $mysqli->connect_error);
         exit();
     }
-    $query = "SELECT * FROM zipShizuoka WHERE zip LIKE '" . $post_data . "%'"
+    $query = "SELECT * FROM zipShizuoka WHERE "
+        . "zip      LIKE '" . $post_data . "%'"
         . "OR kana1 LIKE '" . $post_data . "%'"
         . "OR kana2 LIKE '" . $post_data . "%'"
         . "OR kana3 LIKE '" . $post_data . "%'"
