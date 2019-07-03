@@ -1,14 +1,21 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <title>住所検索</title>
-    </head>
-    <body>
+<html lang=ja>
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>住所検索</title>
+</head>
+<body>
+    <div class="text-center">
         <form method="POST" action="search_result.php">
             <label>郵便番号か住所の一部を入力してください</label> <br/>
             <input type="text" name="input" /><br />
-            <input type="submit" value="送信" />
+            <button type="submit" class="btn btn-primary"> 送信 </button>
         </form>
-    </body>
+    </div>
+</body>
 </html>
