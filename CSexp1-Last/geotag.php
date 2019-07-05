@@ -20,9 +20,18 @@ class geotag
 		$this->pdo = null;
 	}
 
-	function search_address_by_postal($tag) {
+	function search_address_by_postalB($tag) {
 		$keyword = "%" . $tag . "%";
 		$sql  = "SELECT time,latitude,longitude,url FROM geotag,tag IGNORE INDEX(i_tag) WHERE tag.tag LIKE :tag AND geotag.id = tag.id ORDER by time";
+		$stmt = $this->pdo->prepare($sql);
+		$stmt->bindParam(':tag', $keyword);
+		$stmt->execute();
+		return $stmt->fetchAll();
+	}
+
+	function search_address_by_postalC($tag) {
+		$keyword = "%" . $tag . "%";
+		$sql  = "SELECT time,latitude,longitude,url FROM geotag,tag WHERE tag.tag LIKE :tag AND geotag.id = tag.id ORDER by time";
 		$stmt = $this->pdo->prepare($sql);
 		$stmt->bindParam(':tag', $keyword);
 		$stmt->execute();

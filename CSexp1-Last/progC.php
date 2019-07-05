@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="ja">
 	<head>
-		<title>実装Ｂの結果</title>
+		<title>実装Ｃの結果</title>
 	</head>
-	<body bgcolor=lime>
+	<body bgcolor=aqua>
 <?php
 
 require 'geotag.php';
@@ -15,7 +15,7 @@ if(isset($_REQUEST["tag"])){
 	$password = "password";
 	$dbname = "mydatabase";
 	$db = new geotag($servername, $username, $password, $dbname);
-	$result = $db->search_address_by_postalB($tag);
+	$result = $db->search_address_by_postalC($tag);
 ?>
 	<table border="1" width="1000" cellspacing="0" cellpadding="5">
  		<thead>
