@@ -35,7 +35,7 @@
 					}
 					$("#progA,#progB,#progC").addClass("disabled");
 					procTime = (new Date()).getTime();
-					var url = "http://localhost/IS/"+this.id+".php?tag="+encodeURIComponent($("#input").val());
+					var url = "http://192.168.0.4/~pi/"+this.id+".php?tag="+encodeURIComponent($("#input").val());
 					$("#log tbody").append('<tr><td>'+this.id+'</td><td>N/A</td><td>'+$("#input").val()+'</td></tr>');
 					$('#resultFrame').attr({'src':url});
 				});

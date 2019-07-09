@@ -11,9 +11,9 @@ require 'geotag.php';
 if(isset($_REQUEST["tag"])){
 	$tag = $_REQUEST["tag"];
 	$servername = "localhost";
-	$username = "cs17045";
+	$username = "shizutaro";
 	$password = "password";
-	$dbname = "mydatabase";
+	$dbname = "CSexp1DB";
 	$db = new geotag($servername, $username, $password, $dbname);
 	$result = $db->search_address_by_postalC($tag);
 ?>
@@ -34,11 +34,15 @@ if(isset($_REQUEST["tag"])){
 		?>
   		<tr>
 		<td><img src=<?php echo $row[3] ?> width=150></td>
-   		<td><?php echo $row[0] ?></td>
-   		<td><?php echo $row[1] ?></td>
-   		<td><?php echo $row[2] ?></td>
-   		<td><?php echo $row[3] ?></td>
-		<td><iframe src="http://maps.google.co.jp/maps?q=<?php echo $row[1]; ?>,<?php echo $row[2]; ?>&output=embed&t=m&z=16&hl=ja" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" width="200" height="150"></iframe>
+	<?php	 
+		for($j=0;$j<4;$j++){
+			if(!isset($_COOKIE[$tag]))setcookie($tag."[".$i."]"."[".$j ."]",$row[$j],time()+60*5);
+	?>
+   		<td><?php echo $row[$j] ?></td>
+	<?php	
+		}
+	?>
+		<td><iframe src="http://maps.google.co.jp/maps?q=<?php echo $row[1]; ?>,<?php echo $row[2]; ?>&output=embed&t=m&z=16&hl=ja" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" width="200" height="150"></iframe></td>
   		</tr>
 		<?php
 		$i++;
