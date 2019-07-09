@@ -13,7 +13,7 @@
 <?php
     $mysqli = mysqli_connect("localhost", "cs17075", "Nsmhrmlo2", "CSexp1DB");
     $post_data = $_POST["input"];
-    if ($mysqli->connect_errno) {
+    if (mysqli_connect_errno()){
         printf("Connect failed: %s\n", $mysqli->connect_error);
         exit();
     }
@@ -27,20 +27,29 @@
         printResult($result);
     }
 
-    $result->close();
-    $mysqli->close();
+    mysqli_close($result);
+    mysqli_close($mysqli);
 
     function searchAddr($mysqli ,$post_data) {
         $query = "SELECT zip, addr1, addr2, addr3 FROM zipAll WHERE "
-            . "zip      LIKE '"  . $post_data . "%'"
-            . "OR kana1 LIKE '%" . $post_data . "%'"
-            . "OR kana2 LIKE '%" . $post_data . "%'"
-            . "OR kana3 LIKE '%" . $post_data . "%'"
-            . "OR addr1 LIKE '%" . $post_data . "%'"
-            . "OR addr2 LIKE '%" . $post_data . "%'"
-            . "OR addr3 LIKE '%" . $post_data . "%'";
+            . "zip      LIKE ? "
+            . "OR kana1 LIKE ? "
+            . "OR kana2 LIKE ? "
+            . "OR kana3 LIKE ? "
+            . "OR addr1 LIKE ? "
+            . "OR addr2 LIKE ? "
+            . "OR addr3 LIKE ? ";
+        $stmt = mysqli_prepare($mysqli, $query);
+        if (!$stmt) {
+            echo mysqli_error($mysqli);
+            exit();
+        }
+        $post_data = "%$post_data%";
+        mysqli_stmt_bind_param($stmt, "sssssss",$post_data, $post_data, $post_data, $post_data, $post_data, $post_data, $post_data);
 
-        return mysqli_query($mysqli, $query);
+        mysqli_stmt_execute($stmt);
+
+        return mysqli_stmt_get_result($stmt);
     }
 
     function printResult($result) {
@@ -50,7 +59,7 @@
             .'<th>住所</th>'
             .'</thread>'
             .'<tbody>';
-        while($arr = $result->fetch_array(MYSQLI_ASSOC)) {
+        while($arr = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
             $zip = $arr["zip"];
             if (strcmp($arr["addr3"], "以下に掲載がない場合") == 0) {
                 $address = $arr["addr1"] . $arr["addr2"];
@@ -58,12 +67,8 @@
                 $address = $arr["addr1"] . $arr["addr2"] . $arr["addr3"];
             }
             echo "<tr>"
-                    ."<td>"
-                        . $zip
-                    ."</td>"
-                    ."<td>"
-                        . $address
-                    ."</td>"
+                    ."<td>" . $zip     ."</td>"
+                    ."<td>" . $address ."</td>"
                 ."</tr>";
         }
         echo '</tbody>'
