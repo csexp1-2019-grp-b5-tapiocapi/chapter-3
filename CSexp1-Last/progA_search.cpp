@@ -123,7 +123,7 @@ void get_picture_info(vector<result>& results_local){
     } while (fgets(id, GEOID + 1, geotag_fp) != NULL);
 }
 
-void print_result(vector<result>& results_local){
+void print_result(const vector<result>& results_local){
     for(int i=0;i<(int)results_local.size();i++){
         cout << results_local[i].time_str << "\n" << results_local[i].latitude << "\n" << results_local[i].longitude << "\n" << results_local[i].src << endl;
     }
