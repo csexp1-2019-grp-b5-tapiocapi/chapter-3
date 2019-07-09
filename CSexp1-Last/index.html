@@ -2,6 +2,7 @@
 <link rel="stylesheet" type="text/css" href="test.css">
 <html lang="ja">
 	<head>
+        <meta charset="utf-8"/>
 		<title>情報科学実験I 最終課題</title>
 		<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 		<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
@@ -35,7 +36,9 @@
 					}
 					$("#progA,#progB,#progC").addClass("disabled");
 					procTime = (new Date()).getTime();
-					var url = "http://192.168.0.4/~pi/"+this.id+".php?tag="+encodeURIComponent($("#input").val());
+<<<<<<< HEAD
+					var url = ""+this.id+".php?tag="+encodeURIComponent($("#input").val());
+>>>>>>> progA
 					$("#log tbody").append('<tr><td>'+this.id+'</td><td>N/A</td><td>'+$("#input").val()+'</td></tr>');
 					$('#resultFrame').attr({'src':url});
 				});
