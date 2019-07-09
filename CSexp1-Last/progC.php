@@ -24,7 +24,7 @@ if(isset($_REQUEST["tag"])){
   		<th bgcolor=#EE0000 scope="col">latitude</th>
   		<th bgcolor=#EE0000 scope="col">longitude</th>
 		<th bgcolor=#EE0000 scope="col">url</th>
-		<th bgcolor=#EE0000 scope="col">map</th>
+		<!--th bgcolor=#EE0000 scope="col">map</th!-->
  		</thead>
  		<tbody>
 		<?php
@@ -42,7 +42,7 @@ if(isset($_REQUEST["tag"])){
 	<?php	
 		}
 	?>
-		<td><iframe src="http://maps.google.co.jp/maps?q=<?php echo $row[1]; ?>,<?php echo $row[2]; ?>&output=embed&t=m&z=16&hl=ja" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" width="200" height="150"></iframe></td>
+		<!--td><iframe src="http://maps.google.co.jp/maps?q=<?php echo $row[1]; ?>,<?php echo $row[2]; ?>&output=embed&t=m&z=16&hl=ja" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" width="200" height="150"></iframe></td!-->
   		</tr>
 		<?php
 		$i++;
