@@ -1,0 +1,15 @@
+{
+  "name": "dbms-nodejs",
+  "version": "0.0.1",
+  "description": "DBMS Node.js",
+  "main": "dbms-node.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ryo Munakata",
+  "license": "MIT",
+  "dependencies": {
+    "mariadb": "^2.0.5",
+    "mime": "^2.4.4"
+  }
+}
