@@ -1,14 +1,16 @@
-const http = require('http');
+const https = require('https');
 const url = require('url');
 const fs = require('fs');
 const path = require('path');
 const mime = require('mime');
-//const mysql = require('mysql');
 const mariadb = require('mariadb');
 
+const tls_key = "key.pem";
+const tls_cert = "cert.pem";
+
 const pool = mariadb.createPool({
-    host: 'server',
-    user: 'user',
+    host: '127.0.0.1',
+    user: 'csexp1',
     password: 'password',
     database: 'database',
     connectionLimit: 10,
@@ -16,23 +18,35 @@ const pool = mariadb.createPool({
 
 function handleDBSearch(uri, res) {
     try {
-        console.log("Searching: " + uri.query['q']);
+        const query = uri.query['q'];
+        if (query.length === 0) {
+            res.writeHead(200, {
+                'Content-Type': 'application/json; charset=utf-8'}
+            );
+            res.write(JSON.stringify([]));
+            res.end();
+            return;
+        }
+
+        console.log("Searching: " + query);
 
         pool.getConnection().then(conn => {
-            conn.query("select * from zipAll where concat(addr1,addr2,addr3) like ?", ("%" + uri.query['q'] + "%"))
+            var queryres = null;
+            if (!isNaN(query)) {
+                queryres = conn.query("select * from zipAll where zip like ?", ("%" + query + "%"));
+            } else if (query.match(/^[\u30a0-\u30ff]+$/)) {
+                queryres = conn.query("select * from zipAll where concat(kana1,kana2,kana3) like ?", ("%" + query + "%"));
+            } else {
+                queryres = conn.query("select * from zipAll where concat(addr1,addr2,addr3) like ?", ("%" + query + "%"));
+            }
+
+            queryres
                 .then(rows => {
                     res.writeHead(200, {
-                        'Content-Type': 'text/plain; charset=utf-8'}
+                        'Content-Type': 'application/json; charset=utf-8'}
                     );
 
-                    if (rows.length == 0) {
-                        res.write("No result found!\n");
-                    } else {
-                        rows.forEach(row => {
-                            res.write(JSON.stringify(row) + "\n\n");
-                        });
-                    }
-
+                    res.write(JSON.stringify(rows));
                     res.end();
                     conn.end();
                 })
@@ -54,7 +68,7 @@ function handleDBSearch(uri, res) {
 }
 
 function handleGetMethod(pathname, uri, req, res) {
-    if (uri.pathname == "/db/search") {
+    if (uri.pathname === "/db/search") {
         handleDBSearch(uri, res);
         return;
     }
@@ -87,14 +101,19 @@ function handleGetMethod(pathname, uri, req, res) {
     }
 }
 
-http.createServer(function (req, res) {
+const tls_opts = {
+    key: fs.readFileSync(tls_key),
+    cert: fs.readFileSync(tls_cert),
+};
+
+https.createServer(tls_opts, (req, res) => {
     var url_parsed = url.parse(req.url, true);
-    var pathname = "html" + url_parsed.pathname;
+    var pathname = "frontend" + url_parsed.pathname;
 
     console.log(url_parsed);
 
-    if (req.method == "GET") {
+    if (req.method === "GET") {
         handleGetMethod(pathname, url_parsed, req, res);
     }
-}).listen(8080, '0.0.0.0');
-console.log('Server running at http://0.0.0.0:8080/');
+}).listen(8443, '0.0.0.0');
+console.log('Server running at https://0.0.0.0:8443/');

@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="情報科学実験I 第三章 DBMS + Node.js">
+    <title>ZIP/address Searcher</title>
+
+    <link rel="shortcut icon" type="image/png" href="./img/favicon.png">
+
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!-- <link rel="stylesheet" href="assets/css/bootstrap.min.css"> -->
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light container-fluid">
+      <img src="img/favicon.png" width="30" height="30" class="d-inline-block align-top" alt="">
+      <a class="navbar-brand mb-0 h1" href="#">TapiocaPi</a>
+    </nav>
+
+    <div id="app" class="container">
+      <div class="input-group input-group-lg">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="">郵便番号/住所</span>
+        </div>
+        <input class="form-control" v-model="query" @input="onInput" type="search" placeholder="検索" aria-label="Large" aria-describedby="inputGroup-sizing-sm">
+      </div>
+
+      <transition name="slide-fade" mode="out-in">
+        <div id="alert-result-info" class="alert alert-primary" role="alert" :key="lastQuery" v-cloak>
+          <p>Result of: {{ lastQuery }}</p>
+          <hr>
+          <p>Results: {{ searchResults.length }}<br>
+          Currently showed: {{ addrs.length }}</p>
+        </div>
+      </transition>
+
+      <div class="loading" v-if="loading" v-cloak>Loading...</div>
+
+      <div id="google_map" v-show="addrs.length !== 0 || timer === null"></div>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>郵便番号</th>
+            <th>都道府県</th>
+            <th>市区町村</th>
+            <th>町域</th>
+            <th>カナ</th>
+          </tr>
+        </thead>
+        <tbody name="slide-fade" is="transition-group">
+          <tr v-for="(addr, index) in addrs" v-bind:key="addr.zip" v-cloak>
+            <th>{{ index + 1 }}</th>
+            <th>〒{{ addr.zip }}</th>
+            <th>{{ addr.addr1 }}</th>
+            <th>{{ addr.addr2 }}</th>
+            <th>{{ addr.addr3 }}</th>
+            <th>{{ addr.kana1 + addr.kana2 + addr.kana3 }}</th>
+          </tr>
+          </transition-group>
+        </tbody>
+      </table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <!-- <script src="assets/js/bootstrap.min.js"></script> -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDKRJSyt0d-PJ1KHMmoW0QxrCnYaMvkv3w&callback=initMap"></script>
+
+    <script>
+      var app = new Vue({
+        el: '#app',
+        data: {
+          loading: false,     // show loading spinner
+          timer: null,        // timer for querying
+          interval: 500,      // timer interval in millisec
+          query: "",
+          lastQuery: "",
+          itemCount: 1000,
+          rangeEnd:  1000,    // the end of the current range
+          addrs: [],          // the addresses currently showed
+          searchResults: [],
+          geocoder: null,     // Google Map Geocoder API
+          map: null,          // Google Map API
+          markers: [],
+        },
+
+        methods: {
+          onInput: function() {
+            if (this.timer != null) {
+              clearTimeout(this.timer);
+            }
+
+            if (this.query === '' || this.query === this.lastQuery) {
+              return;
+            }
+
+            this.timer = setTimeout(async () => {
+              this.lastQuery = this.query;
+              this.loading = true;
+              console.log("DB search: " + this.query);
+
+              const res = await axios.get("/db/search?q=" + this.query);
+              res.data.forEach((row) => {
+                row.zip = row.zip.slice(0, 3) + "-" + row.zip.slice(3);
+              });
+
+              console.log("DB search done");
+              this.searchResults = res.data;
+              this.addrs = this.searchResults.slice(0, this.itemCount);
+
+              this.deleteMarkers();
+              this.showGoogleMap();
+              this.loading = false;
+            }, this.interval);
+          },
+
+          initOnScroll() {
+            window.onscroll = () => {
+              /*
+              console.log("onScroll called");
+              console.log("scrollTop: " + document.documentElement.scrollTop);
+              console.log("innerHeight: " + window.innerHeight);
+              console.log("offsetHeight: " + document.documentElement.offsetHeight);
+              */
+              const atBottom =
+                Math.ceil(document.documentElement.scrollTop) + window.innerHeight
+                  === document.documentElement.offsetHeight;
+
+              if (atBottom) {
+                if (this.rangeEnd <= this.searchResults.length) {
+                  console.log("REACHED BOTTOM");
+                  this.addrs = this.searchResults.slice(0, this.rangeEnd + this.itemCount);
+                  this.rangeEnd += this.itemCount;
+                }
+              }
+            };
+          },
+
+          deleteMarkers() {
+            this.markers.forEach((marker) => (marker.setMap(null)));
+            this.markers.length = 0;
+          },
+
+          showGoogleMap() {
+            if (this.map === null) {
+              this.map = new google.maps.Map(document.getElementById('google_map'), {
+                center: new google.maps.LatLng(37.8608327,139.976796), /* Yonezawa */
+                zoom: 5,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+              });
+            }
+
+            if (this.geocoder === null) {
+              this.geocoder = new google.maps.Geocoder();
+            }
+
+            /* avoid Google Map Geocoder request limit */
+            this.searchResults.slice(0, 50).forEach((row) => {
+              this.geocoder.geocode({
+                'address': row.addr1 + row.addr2 + row.addr3,
+                'language': 'ja'
+              }, (results, status) => {
+                if (status === google.maps.GeocoderStatus.OK) {
+                  var address_geo = results[0].geometry.location;
+                  var marker = new google.maps.Marker({
+                    position: address_geo,
+                    map: this.map
+                  });
+                  this.markers.push(marker);
+                } else {
+                  console.log("Geocoder failed: " + status);
+                }
+              });
+            });
+          }
+        },
+
+        mounted() {
+          this.initOnScroll();
+        }
+      });
+
+      function initMap() {
+        app.showGoogleMap();
+      }
+    </script>
+  </body>
+</html>
