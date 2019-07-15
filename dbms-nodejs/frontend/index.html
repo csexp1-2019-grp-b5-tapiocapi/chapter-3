@@ -14,55 +14,98 @@
   </head>
 
   <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light container-fluid">
-      <img src="img/favicon.png" width="30" height="30" class="d-inline-block align-top" alt="">
-      <a class="navbar-brand mb-0 h1" href="#">TapiocaPi</a>
-    </nav>
+    <div class="container-fluid">
+      <nav class="navbar navbar-expand-lg navbar-light bg-light rounded">
+        <img src="img/favicon.png" width="30" height="30" class="d-inline-block align-top rounded" alt="">
+        <a class="navbar-brand mb-0 h1" href="#">TapiocaPi</a>
+      </nav>
+    </div>
 
-    <div id="app" class="container">
-      <div class="input-group input-group-lg">
-        <div class="input-group-prepend">
-          <span class="input-group-text" id="">郵便番号/住所</span>
+    <div id="app">
+      <div id="introduction-header" class="jumbotron jumbotron-fluid text-center text-light">
+        <h1 class="display-3">TapiocaPi</h1>
+        <p class="lead">A simple ZIP/address searcher SPA powered by Node.js/Vue.js/Bootstrap.</p>
+
+        <div class="container">
+          <div class="input-group-lg">
+            <input class="form-control rounded-pill shadow" v-model="query" @input="onQueryInput" type="search"
+              placeholder="郵便番号/住所を検索" aria-label="Large" aria-describedby="inputGroup-sizing-sm">
+          </div>
         </div>
-        <input class="form-control" v-model="query" @input="onInput" type="search" placeholder="検索" aria-label="Large" aria-describedby="inputGroup-sizing-sm">
       </div>
 
-      <transition name="slide-fade" mode="out-in">
-        <div id="alert-result-info" class="alert alert-primary" role="alert" :key="lastQuery" v-cloak>
-          <p>Result of: {{ lastQuery }}</p>
-          <hr>
-          <p>Results: {{ searchResults.length }}<br>
-          Currently showed: {{ addrs.length }}</p>
+      <div class="mt-5"></div>
+      <div class="container">
+        <div class="mt-5"></div>
+        <transition name="slide-fade" mode="out-in">
+          <div id="alert-result-info" class="alert alert-primary" role="alert" :key="lastQuery" v-cloak>
+            Result of: {{ lastQuery }}
+          </div>
+        </transition>
+
+        <transition name="slide-fade" mode="out-in">
+          <button type="button" class="btn btn-primary">
+            Found <span class="badge badge-light" :key="searchResults" v-cloak>{{ searchResults.length }}</span>
+            <span class="sr-only">the number of the addresses found</span>
+          </button>
+        </transition>
+
+        <transition name="slide-fade" mode="out-in">
+          <button type="button" class="btn btn-primary">
+            Currently showed <span class="badge badge-light" :key="addrs" v-cloak>{{ addrs.length }}</span>
+            <span class="sr-only">the number of the currently showed addresses</span>
+          </button>
+        </transition>
+
+        <button v-bind:class="mapBtnClass" type="button" @click="onMapBtnClick" aria-expanded="false" v-cloak>
+          {{ mapBtnDesc }}
+        </button>
+
+        <button v-bind:class="markerBtnClass" type="button" @click="onMarkerBtnClick" aria-expanded="false" v-cloak>
+          {{ markerBtnDesc }}
+        </button>
+
+        <div class="loading" v-if="loading" v-cloak>Loading...</div>
+
+        <div class="mt-5"></div>
+        <transition name="slide-fade" mode="out-in">
+          <div v-show="showMap">
+            <div id="google_map" class="rounded"></div>
+          </div>
+        </transition>
+      </div>
+
+      <div class="container-fluid">
+        <div class="mt-5"></div>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <caption>List of the addresses</caption>
+            <thead class="thead-light">
+              <tr>
+                <th>#</th>
+                <th>〒郵便番号</th>
+                <th>都道府県</th>
+                <th>市区町村</th>
+                <th>町域</th>
+                <th>カナ</th>
+              </tr>
+            </thead>
+            <!--<transition-group name="slide-fade" tag="tbody">-->
+            <!-- <tbody name="slide-fade" is="transition-group">-->
+            <tbody>
+              <tr v-for="(addr, index) in addrs" v-bind:key="addr" v-cloak>
+                <th>{{ index + 1 }}</th>
+                <th>{{ addr.zip }}</th>
+                <th>{{ addr.addr1 }}</th>
+                <th>{{ addr.addr2 }}</th>
+                <th>{{ addr.addr3 }}</th>
+                <th>{{ [addr.kana1, addr.kana2, addr.kana3].join(" ") }}</th>
+              </tr>
+              <!--</transition-group>-->
+            </tbody>
+          </table>
         </div>
-      </transition>
-
-      <div class="loading" v-if="loading" v-cloak>Loading...</div>
-
-      <div id="google_map" v-show="addrs.length !== 0 || timer === null"></div>
-
-      <table class="table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>郵便番号</th>
-            <th>都道府県</th>
-            <th>市区町村</th>
-            <th>町域</th>
-            <th>カナ</th>
-          </tr>
-        </thead>
-        <tbody name="slide-fade" is="transition-group">
-          <tr v-for="(addr, index) in addrs" v-bind:key="addr.zip" v-cloak>
-            <th>{{ index + 1 }}</th>
-            <th>〒{{ addr.zip }}</th>
-            <th>{{ addr.addr1 }}</th>
-            <th>{{ addr.addr2 }}</th>
-            <th>{{ addr.addr3 }}</th>
-            <th>{{ addr.kana1 + addr.kana2 + addr.kana3 }}</th>
-          </tr>
-          </transition-group>
-        </tbody>
-      </table>
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
@@ -71,9 +114,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <!-- <script src="assets/js/bootstrap.min.js"></script> -->
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDKRJSyt0d-PJ1KHMmoW0QxrCnYaMvkv3w&callback=initMap"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap"></script>
 
     <script>
+      const MAP_BTN_SHOW = "Show Google Map";
+      const MAP_BTN_HIDE = "Hide Google Map";
+      const MARKER_BTN_ENABLE = "Enable markers";
+      const MARKER_BTN_DISABLE = "Disable markers";
+
+      const BTN_ACTIVE = "btn btn-primary";
+      const BTN_INACTIVE = "btn btn-secondary";
+
       var app = new Vue({
         el: '#app',
         data: {
@@ -82,17 +133,27 @@
           interval: 500,      // timer interval in millisec
           query: "",
           lastQuery: "",
+
           itemCount: 1000,
           rangeEnd:  1000,    // the end of the current range
           addrs: [],          // the addresses currently showed
           searchResults: [],
+
+          showMap: true,
+          mapBtnDesc: MAP_BTN_HIDE,
+          mapBtnClass: BTN_ACTIVE,
+
+          markersEnabled: true,
+          markerBtnDesc: MARKER_BTN_DISABLE,
+          markerBtnClass: BTN_ACTIVE,
+
           geocoder: null,     // Google Map Geocoder API
           map: null,          // Google Map API
           markers: [],
         },
 
         methods: {
-          onInput: function() {
+          onQueryInput: function() {
             if (this.timer != null) {
               clearTimeout(this.timer);
             }
@@ -116,9 +177,21 @@
               this.addrs = this.searchResults.slice(0, this.itemCount);
 
               this.deleteMarkers();
-              this.showGoogleMap();
+              this.drawGoogleMap();
               this.loading = false;
             }, this.interval);
+          },
+
+          onMapBtnClick: function() {
+            this.showMap = !this.showMap;
+            this.mapBtnDesc = this.showMap ? MAP_BTN_HIDE : MAP_BTN_SHOW;
+            this.mapBtnClass = this.showMap ? BTN_ACTIVE : BTN_INACTIVE;
+          },
+
+          onMarkerBtnClick: function() {
+            this.markersEnabled = !this.markersEnabled;
+            this.markerBtnDesc = this.markersEnabled ? MARKER_BTN_DISABLE : MARKER_BTN_ENABLE;
+            this.markerBtnClass = this.markersEnabled ? BTN_ACTIVE : BTN_INACTIVE;
           },
 
           initOnScroll() {
@@ -148,7 +221,7 @@
             this.markers.length = 0;
           },
 
-          showGoogleMap() {
+          drawGoogleMap() {
             if (this.map === null) {
               this.map = new google.maps.Map(document.getElementById('google_map'), {
                 center: new google.maps.LatLng(37.8608327,139.976796), /* Yonezawa */
@@ -160,6 +233,9 @@
             if (this.geocoder === null) {
               this.geocoder = new google.maps.Geocoder();
             }
+
+            if (!this.markersEnabled)
+              return;
 
             /* avoid Google Map Geocoder request limit */
             this.searchResults.slice(0, 50).forEach((row) => {
@@ -173,6 +249,13 @@
                     position: address_geo,
                     map: this.map
                   });
+
+                  google.maps.event.addListener(marker, 'click', function(event) {
+                    new google.maps.InfoWindow({
+                      content: "〒" + row.zip + " " + [row.addr1, row.addr2, row.addr2].join(" ") + ""
+                    }).open(marker.getMap(), marker);
+                  });
+
                   this.markers.push(marker);
                 } else {
                   console.log("Geocoder failed: " + status);
@@ -188,7 +271,7 @@
       });
 
       function initMap() {
-        app.showGoogleMap();
+        app.drawGoogleMap();
       }
     </script>
   </body>
