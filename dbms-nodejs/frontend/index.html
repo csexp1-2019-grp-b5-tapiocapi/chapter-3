@@ -221,6 +221,48 @@
             this.markers.length = 0;
           },
 
+          putMarkers(i) {
+            /* avoid Google Map Geocoder request limit */
+            const markerCandidates = this.searchResults.slice(0, 20);
+
+            function putMarker(app, i) {
+              if (i >= markerCandidates.length) {
+                return;
+              }
+
+              const row = markerCandidates[i];
+
+              window.setTimeout(function() {
+                app.geocoder.geocode({
+                  'address': row.addr1 + row.addr2 + row.addr3,
+                  'language': 'ja'
+                }, (results, status) => {
+                  console.log(i + ": Geocoder status: " + status);
+                  if (status === google.maps.GeocoderStatus.OK) {
+                    var address_geo = results[0].geometry.location;
+                    var marker = new google.maps.Marker({
+                      position: address_geo,
+                      map: app.map
+                    });
+
+                    google.maps.event.addListener(marker, 'click', function(event) {
+                      new google.maps.InfoWindow({
+                        content: "〒" + row.zip + " " + [row.addr1, row.addr2, row.addr2].join(" ")
+                      }).open(marker.getMap(), marker);
+                    });
+
+                    app.markers.push(marker);
+                    putMarker(app, i + 1);
+                  } else {
+                    putMarker(app, status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT ? i : (i + 1));
+                  }
+                });
+              }, 100);
+            }
+
+            putMarker(app, 0);
+          },
+
           drawGoogleMap() {
             if (this.map === null) {
               this.map = new google.maps.Map(document.getElementById('google_map'), {
@@ -237,31 +279,7 @@
             if (!this.markersEnabled)
               return;
 
-            /* avoid Google Map Geocoder request limit */
-            this.searchResults.slice(0, 50).forEach((row) => {
-              this.geocoder.geocode({
-                'address': row.addr1 + row.addr2 + row.addr3,
-                'language': 'ja'
-              }, (results, status) => {
-                if (status === google.maps.GeocoderStatus.OK) {
-                  var address_geo = results[0].geometry.location;
-                  var marker = new google.maps.Marker({
-                    position: address_geo,
-                    map: this.map
-                  });
-
-                  google.maps.event.addListener(marker, 'click', function(event) {
-                    new google.maps.InfoWindow({
-                      content: "〒" + row.zip + " " + [row.addr1, row.addr2, row.addr2].join(" ") + ""
-                    }).open(marker.getMap(), marker);
-                  });
-
-                  this.markers.push(marker);
-                } else {
-                  console.log("Geocoder failed: " + status);
-                }
-              });
-            });
+            this.putMarkers();
           }
         },
 
