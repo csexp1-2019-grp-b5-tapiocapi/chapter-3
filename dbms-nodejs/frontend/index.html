@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="情報科学実験I 第三章 DBMS + Node.js">
-    <title>ZIP/address Searcher</title>
+    <title>TapiocaPi ZIP/address Searcher</title>
 
     <link rel="shortcut icon" type="image/png" href="./img/favicon.png">
 
@@ -14,14 +14,33 @@
   </head>
 
   <body>
-    <div class="container-fluid">
-      <nav class="navbar navbar-expand-lg navbar-light bg-light rounded">
-        <img src="img/favicon.png" width="30" height="30" class="d-inline-block align-top rounded" alt="">
-        <a class="navbar-brand mb-0 h1" href="#">TapiocaPi</a>
-      </nav>
-    </div>
-
     <div id="app">
+
+      <div aria-live="polite" aria-atomic="true" style="position: fixed; min-height: 200px; z-index: 99999; top: 1rem; right: 1rem;">
+        <div id="info-toast" class="toast" data-autohide="false">
+          <div class="toast-header">
+            <img src="img/favicon.png" width="25" height="25" class="rounded mr-2" alt="...">
+            <strong class="mr-auto">Done!</strong>
+            <small v-show="searchResults.length !== 0">
+              {{ markers.length }} / {{ maxMarkers < searchResults.length ? maxMarkers : searchResults.length }}
+            </small>
+            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="toast-body">
+            {{ toastText }}
+          </div>
+        </div>
+      </div>
+
+      <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light rounded">
+          <img src="img/favicon.png" width="30" height="30" class="d-inline-block align-top rounded" alt="">
+          <a class="navbar-brand mb-0 h1" href="#">TapiocaPi</a>
+        </nav>
+      </div>
+
       <div id="introduction-header" class="jumbotron jumbotron-fluid text-center text-light">
         <h1 class="display-3">TapiocaPi</h1>
         <p class="lead">A simple ZIP/address searcher SPA powered by Node.js/Vue.js/Bootstrap.</p>
@@ -128,11 +147,13 @@
       var app = new Vue({
         el: '#app',
         data: {
-          loading: false,     // show loading spinner
+          loading: false,     // show a loading spinner
           timer: null,        // timer for querying
           interval: 500,      // timer interval in millisec
           query: "",
           lastQuery: "",
+
+          toastText: "",
 
           itemCount: 1000,
           rangeEnd:  1000,    // the end of the current range
@@ -147,6 +168,7 @@
           markerBtnDesc: MARKER_BTN_DISABLE,
           markerBtnClass: BTN_ACTIVE,
 
+          maxMarkers: 20,
           geocoder: null,     // Google Map Geocoder API
           map: null,          // Google Map API
           markers: [],
@@ -182,13 +204,26 @@
             }, this.interval);
           },
 
-          onMapBtnClick: function() {
+          showInfoToast() {
+            if (this.timer !== null) {
+              $('#info-toast').toast('dispose');
+              this.toastText = this.searchResults.length === 0 ?
+                "⚠  No such ZIP or address found!" : "Now loading Google Map markers...";
+
+              $('#info-toast').toast({
+                animation: true,
+              });
+              $('#info-toast').toast('show');
+            }
+          },
+
+          onMapBtnClick() {
             this.showMap = !this.showMap;
             this.mapBtnDesc = this.showMap ? MAP_BTN_HIDE : MAP_BTN_SHOW;
             this.mapBtnClass = this.showMap ? BTN_ACTIVE : BTN_INACTIVE;
           },
 
-          onMarkerBtnClick: function() {
+          onMarkerBtnClick() {
             this.markersEnabled = !this.markersEnabled;
             this.markerBtnDesc = this.markersEnabled ? MARKER_BTN_DISABLE : MARKER_BTN_ENABLE;
             this.markerBtnClass = this.markersEnabled ? BTN_ACTIVE : BTN_INACTIVE;
@@ -223,7 +258,7 @@
 
           putMarkers(i) {
             /* avoid Google Map Geocoder request limit */
-            const markerCandidates = this.searchResults.slice(0, 20);
+            const markerCandidates = this.searchResults.slice(0, this.maxMarkers);
 
             function putMarker(app, i) {
               if (i >= markerCandidates.length) {
@@ -247,7 +282,8 @@
 
                     google.maps.event.addListener(marker, 'click', function(event) {
                       new google.maps.InfoWindow({
-                        content: "〒" + row.zip + " " + [row.addr1, row.addr2, row.addr2].join(" ")
+                        content: "〒" + row.zip + " " +
+                          [row.addr1, row.addr2, row.addr3, "(" + row.kana1, row.kana2, row.kana3 + ")"].join(" ")
                       }).open(marker.getMap(), marker);
                     });
 
@@ -280,6 +316,7 @@
               return;
 
             this.putMarkers();
+            this.showInfoToast();
           }
         },
 
