@@ -28,10 +28,10 @@ function handleDBSearch(uri, res) {
             return;
         }
 
-        console.log("Searching: " + query);
+        console.log("[*] Searching: " + query);
 
         pool.getConnection().then(conn => {
-            var queryres = null;
+            let queryres = null;
             if (!isNaN(query)) {
                 queryres = conn.query("select * from zipAll where zip like ?", ("%" + query + "%"));
             } else if (query.match(/^[\u30a0-\u30ff]+$/)) {
@@ -57,7 +57,13 @@ function handleDBSearch(uri, res) {
                     res.end("500 Internal Server Error\n");
                     conn.end();
                 });
-        })
+        }).catch(err => {
+            console.log("[!] " + err);
+            res.writeHead(500, {
+                'Content-Type': 'text/plain'}
+            );
+            res.end("500 Internal Server Error\n");
+        });
     } catch (err) {
         console.log("missing query param");
         res.writeHead(400, {
@@ -74,7 +80,7 @@ function handleGetMethod(pathname, uri, req, res) {
     }
 
     try {
-        var stat = fs.lstatSync(pathname);
+        const stat = fs.lstatSync(pathname);
 
         /* if path is a directory then redirect to index.html */
         if (stat.isDirectory()) {
@@ -107,8 +113,8 @@ const tls_opts = {
 };
 
 https.createServer(tls_opts, (req, res) => {
-    var url_parsed = url.parse(req.url, true);
-    var pathname = "frontend" + url_parsed.pathname;
+    const url_parsed = url.parse(req.url, true);
+    const pathname = "frontend" + url_parsed.pathname;
 
     console.log(url_parsed);
 
@@ -116,4 +122,4 @@ https.createServer(tls_opts, (req, res) => {
         handleGetMethod(pathname, url_parsed, req, res);
     }
 }).listen(8443, '0.0.0.0');
-console.log('Server running at https://0.0.0.0:8443/');
+console.log('[*] Server running at https://0.0.0.0:8443/');
