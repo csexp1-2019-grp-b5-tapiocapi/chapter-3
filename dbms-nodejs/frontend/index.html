@@ -184,10 +184,9 @@
             }
 
             this.timer = setTimeout(async () => {
-              $('#info-toast').toast('dispose');
-
-              this.lastQuery = this.query;
               this.loading = true;
+              this.lastQuery = this.query;
+              $('#info-toast').toast('dispose');
               console.log("DB search: " + this.query);
 
               const res = await axios.get("/db/search?q=" + this.query);
@@ -200,8 +199,9 @@
               this.addrs = this.searchResults.slice(0, this.itemCount);
 
               this.deleteMarkers();
-              this.drawGoogleMap();
               this.loading = false;
+
+              this.drawGoogleMap();
             }, this.interval);
           },
 
@@ -254,25 +254,27 @@
 
           deleteMarkers() {
             this.markers.forEach((marker) => (marker.setMap(null)));
-            this.markers.length = 0;
+            this.markers = [];
           },
 
           putMarkers(i) {
-            /* avoid Google Map Geocoder request limit */
-            const markerCandidates = this.searchResults.slice(0, this.maxMarkers);
-
             function putMarker(app, i) {
-              if (i >= markerCandidates.length) {
+              /* avoid Google Map Geocoder request limit */
+              if (i >= app.searchResults.length || i >= app.maxMarkers || app.loading) {
                 return;
               }
 
-              const row = markerCandidates[i];
+              const row = app.searchResults[i];
 
               window.setTimeout(function() {
                 app.geocoder.geocode({
                   'address': row.addr1 + row.addr2 + row.addr3,
                   'language': 'ja'
                 }, (results, status) => {
+                  if (app.loading) {
+                    return;
+                  }
+
                   console.log(i + ": Geocoder status: " + status);
                   if (status === google.maps.GeocoderStatus.OK) {
                     const address_geo = results[0].geometry.location;
