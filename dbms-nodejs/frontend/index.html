@@ -28,7 +28,8 @@
             </button>
           </div>
           <div class="toast-body">
-            {{ toastText }}
+            <!-- must be used with caution -->
+            <span v-html="toastText"></span>
           </div>
         </div>
       </div>
@@ -206,16 +207,10 @@
           },
 
           showInfoToast() {
-            if (this.timer !== null) {
-              $('#info-toast').toast('dispose');
-              this.toastText = this.searchResults.length === 0 ?
-                "⚠  No such ZIP or address found!" : "Now loading Google Map markers...";
-
-              $('#info-toast').toast({
-                animation: true,
-              });
-              $('#info-toast').toast('show');
-            }
+            $('#info-toast').toast({
+              animation: true,
+            });
+            $('#info-toast').toast('show');
           },
 
           onMapBtnClick() {
@@ -258,9 +253,16 @@
           },
 
           putMarkers(i) {
-            function putMarker(app, i) {
+            function putMarker(app, i, failed) {
               /* avoid Google Map Geocoder request limit */
               if (i >= app.searchResults.length || i >= app.maxMarkers || app.loading) {
+                if (failed) {
+                  app.toastText += "<br>Some errors have been reported."
+                } else if (app.searchResults.length !== 0) {
+                  app.toastText = "All markers loaded successfully.";
+                }
+
+                app.showInfoToast();
                 return;
               }
 
@@ -280,26 +282,34 @@
                     const address_geo = results[0].geometry.location;
                     const marker = new google.maps.Marker({
                       position: address_geo,
-                      map: app.map
+                      map: app.map,
+                      label: (i + 1).toString(),
+                      animation: google.maps.Animation.DROP,
                     });
 
-                    google.maps.event.addListener(marker, 'click', function(event) {
+                    marker.addListener('click', function(event) {
                       new google.maps.InfoWindow({
-                        content: "〒" + row.zip + " " +
-                          [row.addr1, row.addr2, row.addr3, "(" + row.kana1, row.kana2, row.kana3 + ")"].join(" ")
+                        content: "#" + (i + 1) + " 〒" +
+                          [row.zip, row.addr1, row.addr2, row.addr3].join(" ")
                       }).open(marker.getMap(), marker);
                     });
 
                     app.markers.push(marker);
-                    putMarker(app, i + 1);
+                    putMarker(app, i + 1, failed);
                   } else {
-                    putMarker(app, status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT ? i : (i + 1));
+                    if (status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
+                      putMarker(app, i, failed);
+                    } else {
+                      app.toastText += "<br>LatLng not found: " + [row.addr1, row.addr2, row.addr3].join(" ");
+                      putMarker(app, i + 1, true);
+                    }
+
                   }
                 });
               }, 100);
             }
 
-            putMarker(app, 0);
+            putMarker(app, 0, false);
           },
 
           drawGoogleMap() {
@@ -318,8 +328,13 @@
             if (!this.markersEnabled)
               return;
 
-            this.putMarkers();
-            this.showInfoToast();
+            if (this.timer !== null) {
+              this.toastText = this.searchResults.length === 0 ?
+                "⚠  No such ZIP or address found!" : "Now loading Google Map markers...";
+              this.showInfoToast();
+
+              this.putMarkers();
+            }
           }
         },
 
