@@ -234,7 +234,7 @@
               console.log("offsetHeight: " + document.documentElement.offsetHeight);
               */
               const atBottom =
-                Math.ceil(document.documentElement.scrollTop) + window.innerHeight
+                Math.round(document.documentElement.scrollTop) + window.innerHeight
                   === document.documentElement.offsetHeight;
 
               if (atBottom) {
