@@ -1,5 +1,5 @@
-last_search:lastA_search.cpp
-	g++ -Wall -std=c++11 -O3 lastA_search.cpp -o last_search
+last_server:lastA_server.cpp
+	g++ -Wall -std=c++11 -O3 lastA_server.cpp -o last_server
 A_search:progA_search.cpp
 	g++ -Wall -O3 progA_search.cpp -o A_search
 tuning:tuning_data.cpp
