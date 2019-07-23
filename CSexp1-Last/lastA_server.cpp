@@ -34,7 +34,7 @@ int main (int argc, char *argv[]){
     get_info(mp);
     // unsigned long long d = 8376611070;
     // printf("key = %llu i->time = %s i->latitude = %lf i->longitude = %lf i->src = %s\n", d, mp[d]->time, mp[d]->latitude, mp[d]->longitude, mp[d]->src);
-    get_tag(tagmap);
+    // get_tag(tagmap);
 
     return 0;
 }
@@ -60,7 +60,7 @@ void get_info(unordered_map<unsigned long long, info*>& mp){
         getline(ss, buf, ',');
         // istringstream stime(buf);
         // stime >> get_time(&t, "\"%Y-%m-%d %H:%M:%S\"");
-        i->time = (char *)malloc(buf.size() * sizeof(char));
+        i->time = (char *)malloc(buf.size() * sizeof(char) + 1);
         strcpy(i->time, buf.c_str());
         getline(ss, buf, ',');
         latitude = stod(buf);
@@ -71,9 +71,8 @@ void get_info(unordered_map<unsigned long long, info*>& mp){
         getline(ss, buf, ',');
         buf.erase(buf.begin(), buf.begin() + 11); // http://farmまで消す
         buf.erase(buf.begin() + 1, buf.begin() + 20); // farmX以下.static.flickr.com/まで消す
-        // ↓けつの.jpg消そうとするとメモリリークしちゃう 
-        // buf.erase(buf.end()-4, buf.end()); // .jpgを消す
-        i->src = (char *)malloc(buf.size() * sizeof(char));
+        buf.erase(buf.end()-4, buf.end()); // .jpgを消す
+        i->src = (char *)malloc(buf.size() * sizeof(char) + 1);
         strcpy(i->src, buf.c_str());
         mp[key] = i;
     }
