@@ -70,7 +70,7 @@ int clientTCPSocket(const char *hostName, const char *portNum) {
 }
 
 void print_info(int sock, const char* msg) {
-    char buf[100000];
+    char buf[400000];
 
 
     // サーバへ送信
@@ -99,7 +99,7 @@ void print_info(int sock, const char* msg) {
 
     // コンソール表示
     buf[rlen] = '\0';
-    printf("> %s", buf);
+    printf("%s", buf);
     fflush(stdout);
 
   //  sleep(1);	// 1秒待つ

@@ -148,13 +148,13 @@ void echoBackLoop(int acc) {
         return;
     }
 
-    /*
     // 改行コードを行末に差し替える
     buf[len] = '\0';
     char* retPtr = NULL;
     if ((retPtr = strpbrk(buf, "\r\n")) != NULL) {
      *retPtr = '\0';
      }
+    /*
 
     // 入力された内容に ":OK" を付与して送信する
     fprintf(stderr, "[client]%s\n", buf);	// コンソールに出力
