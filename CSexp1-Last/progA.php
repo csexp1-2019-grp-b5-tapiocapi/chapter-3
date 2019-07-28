@@ -10,8 +10,8 @@ ini_set('display_errors', "On");
 ?>
 <?php
 if(isset($_REQUEST["tag"])){
-    echo "input:".$_REQUEST["tag"];
-    exec("./A_search ".$_REQUEST["tag"], $result);
+    // echo "input:".$_REQUEST["tag"];
+    exec("./client ".$_REQUEST["tag"], $result);
     //print_r ($result);
 ?>
     <table border="1" width="1000" cellspacing="0" cellpadding="5">
