@@ -22,15 +22,15 @@ struct info{
     double longitude;
     char *src;
 };
-extern unordered_map<string, vector<unsigned long >> tag_map;
-extern unordered_map<unsigned long, info*> info_map;
+extern unordered_map<string, vector<uint64_t >> tag_map;
+extern unordered_map<uint64_t, info*> info_map;
 
-void create_tagDB (unordered_map<string, vector<unsigned long>>& tagmap);
-void create_geotagDB (unordered_map<unsigned long, info*>&);
-void get_info(unordered_map<unsigned long, info*>& mp);
-void get_tag(unordered_map<string, vector<unsigned long>>& tagmap);
-void print_tagmap(string key, unordered_map<string, vector<unsigned long>> tagmap);
-string fetch_info(unordered_map<unsigned long, info*>&, unordered_map<string, vector<unsigned long>>&, string);
-void sort_infos_by_time(unordered_map<string, vector<unsigned long>>&, unordered_map<unsigned long, info*>&, string&, vector<unsigned long>&);
-void remove_not_appear_info(unordered_map<string, vector<unsigned long>>& tagmap, unordered_map<unsigned long, info*>&);
+void create_tagDB (unordered_map<string, vector<uint64_t>>& tagmap);
+void create_geotagDB (unordered_map<uint64_t, info*>&);
+void get_info(unordered_map<uint64_t, info*>& mp);
+void get_tag(unordered_map<string, vector<uint64_t>>& tagmap);
+void print_tagmap(string key, unordered_map<string, vector<uint64_t>> tagmap);
+string fetch_info(unordered_map<uint64_t, info*>&, unordered_map<string, vector<uint64_t>>&, string);
+void sort_infos_by_time(unordered_map<string, vector<uint64_t>>&, unordered_map<uint64_t, info*>&, string&, vector<uint64_t>&);
+void remove_not_appear_info(unordered_map<string, vector<uint64_t>>& tagmap, unordered_map<uint64_t, info*>&);
 #endif /* LIBSERVER_H_ */

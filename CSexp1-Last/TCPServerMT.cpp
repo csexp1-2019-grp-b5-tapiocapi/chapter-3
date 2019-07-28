@@ -17,8 +17,8 @@ Description : TCP Server implemented by pthread
 
 #define PORT "10000"
 
-unordered_map<string, vector<unsigned long >> tag_map;
-unordered_map<unsigned long, info*> info_map;
+unordered_map<string, vector<uint64_t >> tag_map;
+unordered_map<uint64_t, info*> info_map;
 
 bool start(const char* portNum) {
 
