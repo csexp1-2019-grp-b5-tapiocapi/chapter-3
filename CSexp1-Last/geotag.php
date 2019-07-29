@@ -21,8 +21,8 @@ class geotag
 	}
 
 	function search_address_by_postalB($tag) {
-		$keyword = "%" . $tag . "%";
-		$sql  = "SELECT time,latitude,longitude,url FROM geotag,tag IGNORE INDEX(i_tag) WHERE tag.tag LIKE :tag AND geotag.id = tag.id ORDER by time";
+		$keyword = $tag;
+		$sql  = "SELECT time,latitude,longitude,url FROM geotag,tag IGNORE INDEX(i_tag) WHERE tag.tag LIKE :tag AND geotag.id = tag.id ORDER by time desc";
 		$stmt = $this->pdo->prepare($sql);
 		$stmt->bindParam(':tag', $keyword);
 		$stmt->execute();
@@ -30,8 +30,8 @@ class geotag
 	}
 
 	function search_address_by_postalC($tag) {
-		$keyword = "%" . $tag . "%";
-		$sql  = "SELECT time,latitude,longitude,url FROM geotag,tag WHERE tag.tag LIKE :tag AND geotag.id = tag.id ORDER by time";
+		$keyword = $tag;
+		$sql  = "SELECT time,latitude,longitude,url FROM geotag,tag WHERE tag.tag LIKE :tag AND geotag.id = tag.id ORDER by time desc";
 		$stmt = $this->pdo->prepare($sql);
 		$stmt->bindParam(':tag', $keyword);
 		$stmt->execute();
