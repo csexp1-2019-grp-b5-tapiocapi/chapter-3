@@ -107,7 +107,7 @@ void get_tag(unordered_map<string, vector<uint64_t>>& tagmap){
 }
 void print_tagmap(string key, unordered_map<string, vector<uint64_t>> tagmap){
     // use debug!!
-    cout << key << "\n";
+    // cout << key << "\n";
     for(auto i : tagmap[key]){
         cout << i << "\n";
     }
@@ -167,7 +167,7 @@ void sort_infos_by_time(unordered_map<string, vector<uint64_t>>& tagmap, unorder
 string fetch_info(unordered_map<uint64_t, info*>& map, unordered_map<string, vector<uint64_t>>& tagmap, string input_tag){
     //http://farm9.static.flickr.com/8050/8376611070_aeb13ec0fe.jpg
     // TODO 今の実装だと入力を受け取ってからsortしていて遅い
-    cout << "input:" << input_tag << endl;
+    // cout << "input:" << input_tag << endl;
     vector<uint64_t> ids;
     string send_str, top, middle, bottom;
     char time_chr[32];
@@ -181,8 +181,8 @@ string fetch_info(unordered_map<uint64_t, info*>& map, unordered_map<string, vec
         top = i->src[0];
         middle = s.substr(1,4);
         s.erase(s.begin(),s.begin()+5);
-        send_str += to_string(id);
-        send_str += "\n";
+        // send_str += to_string(id);
+        // send_str += "\n";
         send_str += time_chr;
         send_str += "\n";
         send_str += to_string(i->latitude);

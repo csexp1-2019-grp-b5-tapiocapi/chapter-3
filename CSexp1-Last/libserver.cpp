@@ -94,7 +94,7 @@ void* thread_func(void *arg) {
 
     pthread_detach(pthread_self());
 
-    cout << "thread" << endl;
+    // cout << "thread" << endl;
     echoBackLoop(acc);
     close(acc);
 
@@ -118,7 +118,7 @@ void acceptLoop(int sock) {
             getnameinfo((struct sockaddr *) &from, len, hbuf,
                     sizeof(hbuf), sbuf, sizeof(sbuf),
                     NI_NUMERICHOST | NI_NUMERICSERV);
-            fprintf(stderr, "accept:%s:%s\n", hbuf, sbuf);
+            // fprintf(stderr, "accept:%s:%s\n", hbuf, sbuf);
 
             // スレッド生成
             int* param = (int*)malloc(sizeof(int));
@@ -140,7 +140,7 @@ void echoBackLoop(int acc) {
         perror("recv");
         return;
     }
-    cout << buf << endl;
+    // cout << buf << endl;
 
     if (len == 0) {
         // クライアント側から切断（正常に切断）
@@ -169,7 +169,7 @@ void echoBackLoop(int acc) {
     // TODO 今の実装だと入力を受け取ってからsortしていて遅い
     send_str = fetch_info(info_map, tag_map, input_tag);
     len = send_str.size();
-    cout << send_str;
+    // cout << send_str;
     if ((len = send(acc, send_str.c_str(), len, 0)) == -1) {		// クライアントに送信
     perror("send");
     return;

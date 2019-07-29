@@ -14,7 +14,7 @@ Description : Simple TCP Client, only 1 connection
 #include <unistd.h>
 #include "libclient.h"
 
-#define HOSTNAME "10.0.2.15"
+#define HOSTNAME "192.168.0.30"
 #define PORTNUM "10000"
 
 bool start(const char* hostName, const char* portNum, const char* input) {

@@ -70,7 +70,7 @@ int clientTCPSocket(const char *hostName, const char *portNum) {
 }
 
 void print_info(int sock, const char* msg) {
-    char buf[400000];
+    char buf[50000];
 
 
     // サーバへ送信
