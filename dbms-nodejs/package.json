@@ -9,7 +9,7 @@
   "author": "Ryo Munakata",
   "license": "MIT",
   "dependencies": {
-    "mariadb": "^2.0.5",
+    "mariadb": "^3.5.3",
     "mime": "^2.4.4"
   }
 }
